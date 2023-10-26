@@ -32,10 +32,7 @@ const { code, token, msg } = await fetch(`https://zadania.aidevs.pl/token/${argv
 
 if (code === 0) {
     const task = await fetch(`https://zadania.aidevs.pl/task/${token}`).then(r => r.json());
-
-    console.log('task', task);
     const answer = await openAiAPI(task);
-    console.log({info: 'Odpowiedź z Open AI', answer: JSON.parse(answer)});
 
     const sendAnswer = await fetch(`https://zadania.aidevs.pl/answer/${token}`, {
         method: 'POST',

@@ -7,21 +7,10 @@ const openAiAPI = async (task) => {
         apiKey: Bun.env.OPENAI_KEY
     });
 
-    const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-            {
-                "role": "system",
-                "content": `answer truthfully, as briefly as possible. ###context: ${JSON.stringify(task.input)}`
-            },
-            {
-                "role": "user",
-                "content": task.msg + '. Finally format should looks like: {"answer": [1, 0, 0, 1]}'
-            }
-        ],
-    });
-
-    return response.choices[0].message.content;
+    const moderation = await openai.moderations.create({ input: task.input });
+    const answer = (moderation.results.map(el => el.flagged ? 1 : 0));
+    
+    return answer;
 }
 
 
@@ -32,17 +21,13 @@ const { code, token, msg } = await fetch(`https://zadania.aidevs.pl/token/${argv
 
 if (code === 0) {
     const task = await fetch(`https://zadania.aidevs.pl/task/${token}`).then(r => r.json());
-
-    console.log('task', task);
     const answer = await openAiAPI(task);
-    console.log(answer);
+    const answerAsString = JSON.stringify({answer});
 
     const sendAnswer = await fetch(`https://zadania.aidevs.pl/answer/${token}`, {
         method: 'POST',
-        body: answer
+        body: answerAsString
     }).then(r => r.json());
-
-    console.log('send answer', sendAnswer);
 } else {
     console.error('Hmm, wystąpił jakiś błąd', code, msg);
 }
