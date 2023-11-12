@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-export const showLogFromObject = obj => {
+export const showLogFromObject = (obj: any) => {
     for (const key of Object.keys(obj)) {
         console.log(`${chalk.green(key)}: ${chalk.bold.blue(obj[key])}
         ---`);
